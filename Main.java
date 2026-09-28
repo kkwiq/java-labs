@@ -1,44 +1,19 @@
-import java.util.Scanner;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 public class Main {
-
     public static void main(String[] args) {
-        try (Scanner scanner = new Scanner(System.in)) {
-            System.out.print("Enter a positive whole number: ");
-            
-            if (!scanner.hasNextInt()) {
-                System.out.println("Error: you need to enter a whole number.");
-                return;
-            }
+        Person originalPerson = new Person("Мельник", "Олександр", 20);
+        System.out.println("1. Initial object: " + originalPerson);
 
-            int number = scanner.nextInt();
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        String jsonString = gson.toJson(originalPerson);
+       System.out.println("\n2. JSON string:\n" + jsonString);
 
-            if (number <= 0) {
-                System.out.println("Error: the number must be positive (> 0).");
-                return;
-            }
+        Person deserializedPerson = gson.fromJson(jsonString, Person.class);
+        System.out.println("\n3. Restored object: " + deserializedPerson);
 
-            System.out.println("The entered decimal number: " + number);
-            System.out.println("Binary system (Base 2):        " + convertToBase(number, 2));
-            System.out.println("Octal system (Base 8):       " + convertToBase(number, 8));
-            System.out.println("Hexadecimal system (Base 16): " + convertToBase(number, 16));
-        }
-    }
-
-    public static String convertToBase(int n, int base) {
-        if (n == 0) {
-            return "0";
-        }
-
-        char[] digits = "0123456789ABCDEF".toCharArray();
-        StringBuilder result = new StringBuilder();
-
-        while (n > 0) {
-            int remainder = n % base;
-            result.append(digits[remainder]);
-            n /= base;
-        }
-
-        return result.reverse().toString();
+        boolean areEqual = originalPerson.equals(deserializedPerson);
+        System.out.println("\n4. Equals check: " + areEqual);
     }
 }
