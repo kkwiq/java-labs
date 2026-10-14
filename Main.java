@@ -1,19 +1,22 @@
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 public class Main {
     public static void main(String[] args) {
-        Person originalPerson = new Person("Мельник", "Олександр", 20);
-        System.out.println("1. Initial object: " + originalPerson);
+        Shape[] shapes = new Shape[] {
+            new Rectangle("Red", 4.0, 5.0),
+            new Circle("Blue", 3.0),
+            new Triangle("Green", 6.0, 2.5),
+            new Rectangle("Yellow", 2.0, 8.0),
+            new Circle("Red", 1.5),
+            new Triangle("Black", 4.0, 3.0),
+            new Rectangle("White", 7.0, 3.0),
+            new Circle("Green", 5.0),
+            new Triangle("Blue", 5.0, 4.0),
+            new Rectangle("Orange", 3.5, 4.0),
+            new Circle("Purple", 2.2)
+        };
 
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        String jsonString = gson.toJson(originalPerson);
-       System.out.println("\n2. JSON string:\n" + jsonString);
+        ShapeView view = new ShapeView();
+        ShapeController controller = new ShapeController(shapes, view);
 
-        Person deserializedPerson = gson.fromJson(jsonString, Person.class);
-        System.out.println("\n3. Restored object: " + deserializedPerson);
-
-        boolean areEqual = originalPerson.equals(deserializedPerson);
-        System.out.println("\n4. Equals check: " + areEqual);
+        controller.run();
     }
 }
