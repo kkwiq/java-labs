@@ -1,0 +1,5 @@
+Java I/O streams are powerful.
+This is the second line with some more words in it.
+Short line.
+Here is the line with the maximum number of words to test our program correctly.
+Another simple line.

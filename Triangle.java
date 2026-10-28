@@ -1,0 +1,21 @@
+public class Triangle extends Shape {
+    private static final long serialVersionUID = 1L;
+    private double base;
+    private double height;
+
+    public Triangle(String shapeColor, double base, double height) {
+        super(shapeColor);
+        this.base = base;
+        this.height = height;
+    }
+
+    @Override
+    public double calcArea() {
+        return 0.5 * base * height;
+    }
+
+    @Override
+    public String toString() {
+        return "Triangle [" + super.toString() + ", base=" + base + ", height=" + height + "]";
+    }
+}

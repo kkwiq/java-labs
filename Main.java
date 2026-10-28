@@ -1,57 +1,75 @@
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println("=== 1. Creating passengers ===");
-        Human citizen = new Human("Ivan");
-        Firefighter fireman1 = new Firefighter("Taras");
-        Firefighter fireman2 = new Firefighter("Oleh");
-        Policeman cop = new Policeman("Petro");
+        Scanner scanner = new Scanner(System.in);
 
-        System.out.println("\n=== 2. Getting on the right transport ===");
-        Taxi taxi = new Taxi(2);
-        taxi.boardPassenger(citizen);
-        taxi.boardPassenger(cop);
+        System.out.println("=== Task 4: HTML Tag Frequency Counter ===");
+        System.out.print("Enter URL (or press Enter for 'https://example.com'): ");
+        String urlString = scanner.nextLine().trim();
 
-        FireTruck fireTruck = new FireTruck(2);
-        fireTruck.boardPassenger(foremanOrFireman(fireman1));
-        fireTruck.boardPassenger(fireman2);
-
-        PoliceCar policeCar = new PoliceCar(2);
-        policeCar.boardPassenger(cop);
-
-        Bus bus = new Bus(30);
-        bus.boardPassenger(citizen);
-        bus.boardPassenger(fireman1);
-
-        System.out.println("\n=== 3. Adding a car to the road and counting ===");
-        Road road = new Road();
-        road.addCarToRoad(taxi);
-        road.addCarToRoad(fireTruck);
-        road.addCarToRoad(policeCar);
-
-        System.out.println("\nTotal number of people in cars on the road: " + road.getCountOfHumans());
-
-        System.out.println("\n=== 4. Testing edge cases ===");
-        try {
-            System.out.println("Trying to squeeze an extra passenger into a taxi (capacity: " + taxi.getMaxSeats() + ")...");
-            taxi.boardPassenger(new Human("Olena"));
-        } catch (IllegalStateException e) {
-            System.out.println("Exception caught: " + e.getMessage());
+        if (urlString.isEmpty()) {
+            urlString = "https://example.com";
         }
 
+        Map<String, Integer> tagCounts = new HashMap<>();
+
         try {
-            Human ghost = new Human("Ghost");
-            System.out.println("Attempting to drop off a non-existent passenger...");
-            taxi.unboardPassenger(ghost);
-        } catch (IllegalArgumentException e) {
-            System.out.println("Exception caught: " + e.getMessage());
+            URL url = URI.create(urlString).toURL();
+            System.out.println("Fetching page content from: " + urlString + " ...");
+
+            // Зчитування сторінки через мережевий символьний потік
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(url.openStream(), StandardCharsets.UTF_8))) {
+
+                // Регулярний вираз для пошуку відкриваючих HTML-тегів (наприклад: <div>, <p class="...">)
+                Pattern tagPattern = Pattern.compile("<([a-zA-Z][a-zA-Z0-9]*)\\b");
+                String line;
+
+                while ((line = reader.readLine()) != null) {
+                    Matcher matcher = tagPattern.matcher(line);
+                    while (matcher.find()) {
+                        String tagName = matcher.group(1).toLowerCase();
+                        tagCounts.put(tagName, tagCounts.getOrDefault(tagName, 0) + 1);
+                    }
+                }
+            }
+
+            if (tagCounts.isEmpty()) {
+                System.out.println("No HTML tags found on this page.");
+                scanner.close();
+                return;
+            }
+
+            // Пункт a: вивід тегів у порядку зростання за алфавітом (лексикографічно)
+            List<Map.Entry<String, Integer>> sortedByName = new ArrayList<>(tagCounts.entrySet());
+            sortedByName.sort(Map.Entry.comparingByKey());
+
+            System.out.println("\n--- (a) Tags sorted lexicographically (A -> Z) ---");
+            for (Map.Entry<String, Integer> entry : sortedByName) {
+                System.out.printf("%-15s : %d%n", "<" + entry.getKey() + ">", entry.getValue());
+            }
+
+            // Пункт b: вивід тегів у порядку зростання за частотою появи
+            List<Map.Entry<String, Integer>> sortedByFrequency = new ArrayList<>(tagCounts.entrySet());
+            sortedByFrequency.sort(Map.Entry.comparingByValue());
+
+            System.out.println("\n--- (b) Tags sorted by frequency (ascending) ---");
+            for (Map.Entry<String, Integer> entry : sortedByFrequency) {
+                System.out.printf("%-15s : %d%n", "<" + entry.getKey() + ">", entry.getValue());
+            }
+
+        } catch (Exception e) {
+            System.out.println("Error reading URL: " + e.getMessage());
         }
 
-        System.out.println("Successful landing:");
-        taxi.unboardPassenger(citizen);
-        System.out.println("Occupied seats in the taxi now: " + taxi.getOccupiedSeats());
-    }
-
-    private static Firefighter foremanOrFireman(Firefighter f) {
-        return f;
+        scanner.close();
     }
 }
