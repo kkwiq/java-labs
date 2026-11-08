@@ -1,60 +1,85 @@
-import java.io.Console;
+import java.util.List;
 import java.util.Scanner;
+import java.util.function.IntPredicate;
+import java.util.function.IntUnaryOperator;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Main {
-    public static void main(String[] args) {
-        Translator translator = new Translator();
 
-        translator.addWord("student", "студент");
-        translator.addWord("is", "це");
-        translator.addWord("learning", "вивчає");
-        translator.addWord("java", "джава");
-        translator.addWord("cat", "котик");
-        translator.addWord("says", "каже");
-        translator.addWord("meow", "мяу");
+    public static final IntPredicate isPrime = n -> {
+        if (n < 2) return false;
+        return IntStream.rangeClosed(2, (int) Math.sqrt(n))
+                .noneMatch(divisor -> n % divisor == 0);
+    };
 
-        Scanner scanner = new Scanner(System.in);
+    public static final IntUnaryOperator reverseNumber = n -> {
+        int reversed = 0;
+        int temp = n;
+        while (temp > 0) {
+            reversed = reversed * 10 + (temp % 10);
+            temp /= 10;
+        }
+        return reversed;
+    };
 
-        while (true) {
-            System.out.println("\n=== English-Ukrainian Translator ===");
-            System.out.println("1. Translate phrase");
-            System.out.println("2. Add new word to dictionary");
-            System.out.println("3. Show current dictionary");
-            System.out.println("0. Exit");
-            System.out.print("Select an option: ");
+    public static final IntPredicate isSuperPrime = n -> 
+            isPrime.test(n) && isPrime.test(reverseNumber.applyAsInt(n));
 
-            String choice = scanner.nextLine().trim();
+    public static long countSuperPrimes(int n) {
+        return IntStream.rangeClosed(1, n)
+                .filter(isSuperPrime)
+                .count();
+    }
 
-            switch (choice) {
-                case "1":
-                    System.out.print("\nEnter English phrase: ");
-                    String inputPhrase = scanner.nextLine();
-                    String translation = translator.translatePhrase(inputPhrase);
-                    System.out.println("Translation: " + translation);
-                    break;
+    public static List<Integer> getSuperPrimes(int n) {
+        return IntStream.rangeClosed(1, n)
+                .filter(isSuperPrime)
+                .boxed()
+                .collect(Collectors.toList());
+    }
 
-                case "2":
-                    System.out.print("\nEnter English word: ");
-                    String en = scanner.nextLine();
-                    System.out.print("Enter Ukrainian translation: ");
-                    String ua = scanner.nextLine();
-                    translator.addWord(en, ua);
-                    System.out.println("Successfully added: " + en + " -> " + ua);
-                    break;
-
-                case "3":
-                    System.out.println("\n--- Dictionary (" + translator.getDictionary().size() + " words) ---");
-                    translator.getDictionary().forEach((k, v) -> System.out.println(k + " -> " + v));
-                    break;
-
-                case "0":
-                    System.out.println("Exiting program...");
-                    scanner.close();
-                    return;
-
-                default:
-                    System.out.println("Invalid option. Try again.");
+    public static void printFormattedList(List<Integer> list, int itemsPerRow) {
+        for (int i = 0; i < list.size(); i++) {
+            System.out.printf("%5d", list.get(i));
+            if ((i + 1) % itemsPerRow == 0 || i == list.size() - 1) {
+                System.out.println();
             }
         }
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("=== Lab 7: Super-Prime Numbers (Lambdas & Stream API) ===");
+        System.out.print("Enter natural number n (n <= 1000): ");
+
+        if (!scanner.hasNextInt()) {
+            System.out.println("Error: Please enter a valid integer.");
+            scanner.close();
+            return;
+        }
+
+        int n = scanner.nextInt();
+
+        if (n < 1 || n > 1000) {
+            System.out.println("Error: Number n must be in range [1, 1000].");
+            scanner.close();
+            return;
+        }
+
+        long count = countSuperPrimes(n);
+        List<Integer> list = getSuperPrimes(n);
+
+        System.out.println("\n------------------------------------------------------------");
+        System.out.println("RESULTS FOR n = " + n);
+        System.out.println("------------------------------------------------------------");
+        System.out.println("Total super-prime numbers found : " + count);
+        System.out.println("\nList of super-prime numbers (10 per row):");
+        System.out.println("------------------------------------------------------------");
+        printFormattedList(list, 10);
+        System.out.println("------------------------------------------------------------");
+
+        scanner.close();
     }
 }
